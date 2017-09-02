@@ -13,7 +13,22 @@ import retrofit2.http.Query;
 public interface Dota2API {
 
     String baseUrl = "http://api.steampowered.com/";
+    /**
+     * hero
+     * http://cdn.dota2.com/apps/dota2/images/heroes/HERONAME_SUFFIX
+     * suffix:
+     * sb.png: 59x33px small horizontal portrait
+     * lg.png: 205x105px large horizontal portrait
+     * full.png: 256x144px full-quality horizontal portrait
+     * vert.jpg: 235x272px full-quality vertical portrait (note that this is a .jpg)
+     */
+
+    /**
+     * item
+     * http://cdn.dota2.com/apps/dota2/images/items/ITEMNAME_lg.png
+     */
     String imageUrl = "http://cdn.dota2.com/";
+
     String key = "FA00A197B3CC052163DCF5C5B691009F";
     String account_id = "136647688";
 //    String account_id = "76561198096913416";

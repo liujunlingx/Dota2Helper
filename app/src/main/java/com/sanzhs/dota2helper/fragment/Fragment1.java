@@ -1,15 +1,21 @@
 package com.sanzhs.dota2helper.fragment;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
+import android.widget.TextView;
 
+import com.github.nuptboyzhb.lib.SuperSwipeRefreshLayout;
 import com.sanzhs.dota2helper.R;
-import com.sanzhs.dota2helper.adapter.ListViewAdapter;
+import com.sanzhs.dota2helper.adapter.MatchAdapter;
 import com.sanzhs.dota2helper.web.Dota2API;
 
 import org.json.JSONArray;
@@ -34,19 +40,20 @@ import retrofit2.Retrofit;
  * Created by sanzhs on 2017/8/24.
  */
 
-public class Fragment1 extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+public class Fragment1 extends Fragment {
 
-    //TODO 移植使用RecyclerView
-    //TODO 下拉刷新
-    //TODO 上拉加载更多
+    //TODO recyclerView右边搞个进度条
     //TODO 单击查看单场详细
+    //TODO 第三格做新闻，WebAPI/GetNewsForApp，textView.setText(Html.fromHtml(String htmlStr)));,ExpandableTextView
+    //TODO 搜索id
     //TODO 关注列表
     //TODO 怎么让所有东西一次性显示出来
-    //TODO 上传到github，写readme
 
-    private int matches_requested = 10;
-    private SwipeRefreshLayout refresh;
-    private ListView matches;
+    private int matches_requested = 20;
+
+    private SuperSwipeRefreshLayout swipeRefreshLayout;
+    private RecyclerView rvMatches;
+    private MatchAdapter adapter;
     private List<Map<String, Object>> list = new ArrayList<>();
     private Map<Integer,String> heroMap = new HashMap<>();//key:hero_id value:heroImageUrl
 
@@ -54,9 +61,61 @@ public class Fragment1 extends Fragment implements SwipeRefreshLayout.OnRefreshL
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment1, container, false);
 
-        refresh = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh);
-        refresh.setOnRefreshListener(this);
-        matches = (ListView) rootView.findViewById(R.id.matches);
+        swipeRefreshLayout = (SuperSwipeRefreshLayout) rootView.findViewById(R.id.swipeRefreshLayout);
+
+        //设置下拉刷新监听器
+        swipeRefreshLayout.setOnPullRefreshListener(new SuperSwipeRefreshLayout.OnPullRefreshListener() {
+            @Override
+            public void onRefresh() {
+                int count = list.size();
+                list.clear();
+                getData(count,"");
+            }
+
+            @Override
+            public void onPullDistance(int i) {
+
+            }
+
+            @Override
+            public void onPullEnable(boolean b) {
+
+            }
+        });
+        //设置上拉加载更多监听器
+        swipeRefreshLayout.setOnPushLoadMoreListener(new SuperSwipeRefreshLayout.OnPushLoadMoreListener() {
+            @Override
+            public void onLoadMore() {
+                new Handler().postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        int oldSize = list.size();
+                        Long lastMatchId = Long.parseLong((String) list.get(oldSize-1).get("matchId"));
+                        getData(matches_requested,String.valueOf(lastMatchId - 1));
+                        swipeRefreshLayout.setLoadMore(false);
+                    }
+                }, 3000);
+            }
+
+            @Override
+            public void onPushDistance(int i) {
+
+            }
+
+            @Override
+            public void onPushEnable(boolean b) {
+
+            }
+        });
+        swipeRefreshLayout.setFooterView(createFooterView());
+
+        rvMatches = (RecyclerView) rootView.findViewById(R.id.rvMatches);
+        rvMatches.setLayoutManager(new LinearLayoutManager(getActivity()));
+        rvMatches.addItemDecoration(new DividerItemDecoration(getActivity(), OrientationHelper.VERTICAL));
+        rvMatches.setItemAnimator(new DefaultItemAnimator());
+        adapter = new MatchAdapter(getActivity(),list);
+        rvMatches.setAdapter(adapter);
 
         initHeroMap();
         getData(matches_requested,null);
@@ -126,7 +185,7 @@ public class Fragment1 extends Fragment implements SwipeRefreshLayout.OnRefreshL
                         matchIdList.add(matchId);
                     }
                     getMatchDetails(matchIdList);
-                    refresh.setRefreshing(false);
+                    swipeRefreshLayout.setRefreshing(false);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -160,6 +219,8 @@ public class Fragment1 extends Fragment implements SwipeRefreshLayout.OnRefreshL
 
                         Map<String, Object> map = new HashMap<>();
                         map.put("matchId",matchId);
+
+                        if(response.body() == null) return;
                         JSONObject result = new JSONObject(response.body().string()).getJSONObject("result");
                         JSONArray players = result.getJSONArray("players");
                         for(int i = 0;i<players.length();i++){
@@ -199,6 +260,8 @@ public class Fragment1 extends Fragment implements SwipeRefreshLayout.OnRefreshL
                         map.put("gameResult",gameResult);
                         map.put("startTime",startTime);
                         map.put("kda",kda);
+
+
                         list.add(map);
 
                         Collections.sort(list, new Comparator<Map<String, Object>>() {
@@ -213,8 +276,8 @@ public class Fragment1 extends Fragment implements SwipeRefreshLayout.OnRefreshL
                             }
                         });
 
-                        ListViewAdapter adapter = new ListViewAdapter(getActivity(),list);
-                        Fragment1.this.matches.setAdapter(adapter);
+
+                        Fragment1.this.adapter.notifyDataSetChanged();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     } catch (IOException e) {
@@ -232,9 +295,12 @@ public class Fragment1 extends Fragment implements SwipeRefreshLayout.OnRefreshL
 
     }
 
-    @Override
-    public void onRefresh() {
-        Long lastMatchId = Long.parseLong((String) list.get(list.size()-1).get("matchId"));
-        getData(matches_requested,String.valueOf(lastMatchId - 1));
+    private View createFooterView() {
+        View footerView = LayoutInflater.from(swipeRefreshLayout.getContext())
+                .inflate(R.layout.item_foot, null);
+        TextView textView = (TextView) footerView.findViewById(R.id.footText);
+        textView.setText("٩(๑❛ᴗ❛๑)۶  I'm loading  ٩(๑❛ᴗ❛๑)۶");
+        return footerView;
     }
+
 }
