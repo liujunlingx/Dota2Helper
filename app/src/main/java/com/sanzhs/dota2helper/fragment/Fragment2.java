@@ -22,7 +22,6 @@ public class Fragment2 extends Fragment {
 
         TextView tv = (TextView) rootView.findViewById(R.id.textView2);
         tv.setText("fragment2");
-        Log.i("tag","fragment2 setChecked and setText done");
 
         return rootView;
     }

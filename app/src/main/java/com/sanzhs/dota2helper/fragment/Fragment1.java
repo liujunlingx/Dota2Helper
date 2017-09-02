@@ -43,8 +43,8 @@ import retrofit2.Retrofit;
 public class Fragment1 extends Fragment {
 
     //TODO recyclerView右边搞个进度条
+    //TODO 处理没有网络的情况
     //TODO 单击查看单场详细
-    //TODO 第三格做新闻，WebAPI/GetNewsForApp，textView.setText(Html.fromHtml(String htmlStr)));,ExpandableTextView
     //TODO 搜索id
     //TODO 关注列表
     //TODO 怎么让所有东西一次性显示出来
@@ -52,7 +52,7 @@ public class Fragment1 extends Fragment {
     private int matches_requested = 20;
 
     private SuperSwipeRefreshLayout swipeRefreshLayout;
-    private RecyclerView rvMatches;
+    private RecyclerView recyclerView;
     private MatchAdapter adapter;
     private List<Map<String, Object>> list = new ArrayList<>();
     private Map<Integer,String> heroMap = new HashMap<>();//key:hero_id value:heroImageUrl
@@ -60,8 +60,7 @@ public class Fragment1 extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment1, container, false);
-
-        swipeRefreshLayout = (SuperSwipeRefreshLayout) rootView.findViewById(R.id.swipeRefreshLayout);
+        findViewByIds(rootView);
 
         //设置下拉刷新监听器
         swipeRefreshLayout.setOnPullRefreshListener(new SuperSwipeRefreshLayout.OnPullRefreshListener() {
@@ -110,14 +109,16 @@ public class Fragment1 extends Fragment {
         });
         swipeRefreshLayout.setFooterView(createFooterView());
 
-        rvMatches = (RecyclerView) rootView.findViewById(R.id.rvMatches);
-        rvMatches.setLayoutManager(new LinearLayoutManager(getActivity()));
-        rvMatches.addItemDecoration(new DividerItemDecoration(getActivity(), OrientationHelper.VERTICAL));
-        rvMatches.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), OrientationHelper.VERTICAL));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
         adapter = new MatchAdapter(getActivity(),list);
-        rvMatches.setAdapter(adapter);
+        recyclerView.setAdapter(adapter);
 
+        //初始化heroMap
         initHeroMap();
+
+        //获取数据
         getData(matches_requested,null);
 
         return rootView;
@@ -301,6 +302,11 @@ public class Fragment1 extends Fragment {
         TextView textView = (TextView) footerView.findViewById(R.id.footText);
         textView.setText("٩(๑❛ᴗ❛๑)۶  I'm loading  ٩(๑❛ᴗ❛๑)۶");
         return footerView;
+    }
+
+    private void findViewByIds(View rootView){
+        swipeRefreshLayout = (SuperSwipeRefreshLayout) rootView.findViewById(R.id.swipeRefreshLayout);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.rvMatches);
     }
 
 }
