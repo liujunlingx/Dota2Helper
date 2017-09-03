@@ -2,6 +2,7 @@ package com.sanzhs.dota2helper.fragment;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
@@ -23,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -50,15 +52,26 @@ public class Fragment1 extends Fragment {
     //TODO 怎么让所有东西一次性显示出来
 
     private int matches_requested = 20;
+    public enum GameResult{
+        WIN("赢一手"),
+        LOSE("抱头鼠窜");
+        public String info;
+        GameResult(String info){
+            this.info = info;
+        }
+    }
 
     private SuperSwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
     private MatchAdapter adapter;
     private List<Map<String, Object>> list = new ArrayList<>();
-    private Map<Integer,String> heroMap = new HashMap<>();//key:hero_id value:heroImageUrl
+    private Map<Integer,String> heroMap = new HashMap<>();//key:hero_id, value:heroName eg. npc_dota_hero_riki
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
         View rootView = inflater.inflate(R.layout.fragment1, container, false);
         findViewByIds(rootView);
 
@@ -129,7 +142,7 @@ public class Fragment1 extends Fragment {
         super.onActivityCreated(savedInstanceState);
     }
 
-    private void initHeroMap(){
+    public void initHeroMap(){
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Dota2API.baseUrl)
                 .build();
@@ -197,7 +210,7 @@ public class Fragment1 extends Fragment {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                System.err.println(t.getMessage());
+                t.printStackTrace();
             }
         });
 
@@ -245,23 +258,24 @@ public class Fragment1 extends Fragment {
                         //the most significant bit represents team,0 for radiant,1 for dire
                         if(player_slot>=0 && player_slot<=4){
                             if(radiant_win)
-                                gameResult = "胜";
+                                gameResult = GameResult.WIN.info;
                             else
-                                gameResult = "负";
+                                gameResult = GameResult.LOSE.info;
                         }else{
                             if(radiant_win)
-                                gameResult = "负";
+                                gameResult = GameResult.LOSE.info;
                             else
-                                gameResult = "胜";
+                                gameResult = GameResult.WIN.info;
                         }
 
+                        String kdaValue = String.valueOf(new DecimalFormat("######0.00").format(((double)(kills + assists))/deaths));
                         String kda = kills + "\\" + deaths + "\\" + assists;
 
-                        map.put("heroImageUrl",heroMap.get(hero_id));
+                        map.put("heroName",heroMap.get(hero_id));
                         map.put("gameResult",gameResult);
                         map.put("startTime",startTime);
+                        map.put("kdaValue",kdaValue);
                         map.put("kda",kda);
-
 
                         list.add(map);
 
@@ -276,7 +290,6 @@ public class Fragment1 extends Fragment {
                                     return 1;
                             }
                         });
-
 
                         Fragment1.this.adapter.notifyDataSetChanged();
                     } catch (JSONException e) {

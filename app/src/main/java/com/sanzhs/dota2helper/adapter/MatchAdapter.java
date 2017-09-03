@@ -2,6 +2,7 @@ package com.sanzhs.dota2helper.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sanzhs.dota2helper.R;
+import com.sanzhs.dota2helper.fragment.Fragment1;
 import com.sanzhs.dota2helper.util.StringUtils;
 import com.sanzhs.dota2helper.web.Dota2API;
 import com.squareup.picasso.Picasso;
@@ -45,22 +47,32 @@ public class MatchAdapter extends RecyclerView.Adapter<ViewHolder>
     {
         MyViewHolder myViewHolder = (MyViewHolder) holder;
         //eg. npc_dota_hero_riki -> riki
-        String heroName = ((String)data.get(position).get("heroImageUrl")).substring(14);
-        String imageUrl = Dota2API.imageUrl + "apps/dota2/images/heroes/" + heroName + "_sb.png";
+        String heroName = ((String)data.get(position).get("heroName")).substring(14);
 
+        //load from network
+//        String imageUrl = Dota2API.imageUrl + "apps/dota2/images/heroes/" + heroName + "_sb.png";
+//        Picasso.with(context)
+//                .load(imageUrl)
+//                .resize(177,99)
+//                .into(myViewHolder.ivHero);
+
+        //load from file
         Picasso.with(context)
-                .load(imageUrl)
+                .load("file:///android_asset/heros/" + heroName + "_full.png")
                 .resize(177,99)
                 .into(myViewHolder.ivHero);
         myViewHolder.gameResult.setText((String)data.get(position).get("gameResult"));
         myViewHolder.gameResult.setTextColor(Color.rgb(255,255,255));
-        if(myViewHolder.gameResult.getText().toString().equals("胜"))
+        if(myViewHolder.gameResult.getText().toString().equals(Fragment1.GameResult.WIN.info))
             myViewHolder.gameResult.setBackgroundColor(Color.rgb(0,100,0));
         else
             myViewHolder.gameResult.setBackgroundColor(Color.rgb(96,96,96));
 
         String startTime = StringUtils.unixTimeStampToDate((long)data.get(position).get("startTime"),"yyyy-MM-dd");
         myViewHolder.endTime.setText(startTime);
+
+        myViewHolder.kdaValue.setTypeface(null, Typeface.BOLD);
+        myViewHolder.kdaValue.setText((String)data.get(position).get("kdaValue"));
         myViewHolder.kda.setText((String)data.get(position).get("kda"));
     }
 
@@ -75,6 +87,7 @@ public class MatchAdapter extends RecyclerView.Adapter<ViewHolder>
         ImageView ivHero;
         TextView gameResult;
         TextView endTime;
+        TextView kdaValue;
         TextView kda;
 
         public MyViewHolder(View view)
@@ -83,6 +96,7 @@ public class MatchAdapter extends RecyclerView.Adapter<ViewHolder>
             ivHero = (ImageView) view.findViewById(R.id.hero);
             gameResult = (TextView) view.findViewById(R.id.gameResult);
             endTime = (TextView) view.findViewById(R.id.startTime);
+            kdaValue = (TextView) view.findViewById(R.id.kdaValue);
             kda = (TextView) view.findViewById(R.id.kda);
         }
     }
