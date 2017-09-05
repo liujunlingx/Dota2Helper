@@ -2,9 +2,10 @@
 A convinent tool showing dota2 user data.
 
 ## Function
-- [x] Recent matches.  
-    ![Recent matches](https://github.com/castellanogg/Dota2Helper/blob/master/app/src/main/assets/demo/RecentMatches.png)
-- [x] Match detail.  
-    ![Match Detail](https://github.com/castellanogg/Dota2Helper/blob/master/app/src/main/assets/demo/MatchDetail.png)
-- [x] Dota2 News.  
-    ![Dota2 News](https://github.com/castellanogg/Dota2Helper/blob/master/app/src/main/assets/demo/News.png)
+- [x] Recent matches.
+- [x] Match detail.
+- [x] Dota2 News.
+
+![Recent matches](https://github.com/castellanogg/Dota2Helper/blob/master/app/src/main/assets/demo/RecentMatches.png)
+![Match Detail](https://github.com/castellanogg/Dota2Helper/blob/master/app/src/main/assets/demo/MatchDetail.png)
+![Dota2 News](https://github.com/castellanogg/Dota2Helper/blob/master/app/src/main/assets/demo/News.png)
