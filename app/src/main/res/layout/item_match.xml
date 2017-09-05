@@ -6,7 +6,7 @@
     <ImageView android:id="@+id/hero"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="5px"/>
+        android:layout_margin="5dp"/>
 
     <LinearLayout android:orientation="horizontal"
         android:layout_width="wrap_content"

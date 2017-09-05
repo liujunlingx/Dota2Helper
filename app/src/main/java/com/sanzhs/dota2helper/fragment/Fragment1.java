@@ -1,5 +1,6 @@
 package com.sanzhs.dota2helper.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
@@ -12,9 +13,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.nuptboyzhb.lib.SuperSwipeRefreshLayout;
+import com.sanzhs.dota2helper.MatchDetailActivity;
 import com.sanzhs.dota2helper.R;
 import com.sanzhs.dota2helper.adapter.MatchAdapter;
 import com.sanzhs.dota2helper.web.Dota2API;
@@ -42,8 +46,9 @@ import retrofit2.Retrofit;
  * Created by sanzhs on 2017/8/24.
  */
 
-public class Fragment1 extends Fragment {
+public class Fragment1 extends Fragment implements AdapterView.OnItemClickListener{
 
+    //TODO 单场详细加个toolbar，左边返回，中间比赛id
     //TODO recyclerView右边搞个进度条
     //TODO 处理没有网络的情况
     //TODO 单击查看单场详细
@@ -52,6 +57,7 @@ public class Fragment1 extends Fragment {
     //TODO 怎么让所有东西一次性显示出来
 
     private int matches_requested = 20;
+
     public enum GameResult{
         WIN("赢一手"),
         LOSE("抱头鼠窜");
@@ -65,13 +71,27 @@ public class Fragment1 extends Fragment {
     private RecyclerView recyclerView;
     private MatchAdapter adapter;
     private List<Map<String, Object>> list = new ArrayList<>();
-    private Map<Integer,String> heroMap = new HashMap<>();//key:hero_id, value:heroName eg. npc_dota_hero_riki
+    public static Map<Integer,String> heroMap = new HashMap<>();//key:hero_id, value:heroName eg. npc_dota_hero_riki
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        switch (view.getId()){
+            case R.id.hero:
+                Toast.makeText(getActivity(),"hero clicked,match id: " + list.get(position).get("matchId"),Toast.LENGTH_LONG).show();
+                break;
+            case R.id.gameResult:
+                Toast.makeText(getActivity(),"gameResult clicked",Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                Intent intent = new Intent();
+                intent.putExtra("matchId",(String) list.get(position).get("matchId"));
+                intent.setClass(getContext(), MatchDetailActivity.class);
+                startActivity(intent);
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
-
         View rootView = inflater.inflate(R.layout.fragment1, container, false);
         findViewByIds(rootView);
 
@@ -125,8 +145,15 @@ public class Fragment1 extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), OrientationHelper.VERTICAL));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        adapter = new MatchAdapter(getActivity(),list);
+        adapter = new MatchAdapter(getActivity(),list,this);
         recyclerView.setAdapter(adapter);
+        recyclerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle bundle = new Bundle();
+                System.out.println();
+            }
+        });
 
         //初始化heroMap
         initHeroMap();
@@ -268,7 +295,7 @@ public class Fragment1 extends Fragment {
                                 gameResult = GameResult.WIN.info;
                         }
 
-                        String kdaValue = String.valueOf(new DecimalFormat("######0.00").format(((double)(kills + assists))/deaths));
+                        String kdaValue = new DecimalFormat("######0.00").format(((double)(kills + assists))/deaths);
                         String kda = kills + "\\" + deaths + "\\" + assists;
 
                         map.put("heroName",heroMap.get(hero_id));

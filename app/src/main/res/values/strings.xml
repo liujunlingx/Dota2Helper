@@ -3,4 +3,8 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string name="endTime">结束时间</string>
+    <string name="duration">持续时间</string>
+    <string name="gameMode">比赛模式</string>
+    <string name="centerText">数据来自www.泵泵.com</string>
 </resources>

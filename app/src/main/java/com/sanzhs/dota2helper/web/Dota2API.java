@@ -58,4 +58,10 @@ public interface Dota2API {
                                      @Query("appid")int appid,
                                      @Query("count")int count);
 
+    //GetPlayerSummaries
+    @GET("ISteamUser/GetPlayerSummaries/v0002")
+    Call<ResponseBody> getPlayerSummaries(@Query("key")String key,
+                                          @Query("steamids")String commaSeparatedSteamids);
+
+
 }
