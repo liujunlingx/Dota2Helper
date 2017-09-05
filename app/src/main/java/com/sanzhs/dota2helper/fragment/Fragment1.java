@@ -49,11 +49,10 @@ import retrofit2.Retrofit;
 public class Fragment1 extends Fragment implements AdapterView.OnItemClickListener{
 
     //TODO 单场详细加个toolbar，左边返回，中间比赛id
+    //TODO 搜索id
     //TODO recyclerView右边搞个进度条
     //TODO 处理没有网络的情况
-    //TODO 单击查看单场详细
-    //TODO 搜索id
-    //TODO 关注列表
+    //TODO 处理卷轴物品
     //TODO 怎么让所有东西一次性显示出来
 
     private int matches_requested = 20;
@@ -72,6 +71,7 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
     private MatchAdapter adapter;
     private List<Map<String, Object>> list = new ArrayList<>();
     public static Map<Integer,String> heroMap = new HashMap<>();//key:hero_id, value:heroName eg. npc_dota_hero_riki
+    public static Map<Integer,String> itemMap = new HashMap<>();
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -157,6 +157,8 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
 
         //初始化heroMap
         initHeroMap();
+        //初始化itemMap
+        initItemMap();
 
         //获取数据
         getData(matches_requested,null);
@@ -187,6 +189,41 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
                         JSONObject hero = heros.getJSONObject(i);
                         heroMap.put(hero.getInt("id"),hero.getString("name"));
                     }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+    }
+
+    public void initItemMap(){
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Dota2API.baseUrl)
+                .build();
+
+        Dota2API dota2API = retrofit.create(Dota2API.class);
+
+        Call<ResponseBody> call= dota2API.getItems(Dota2API.key);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    JSONObject object = new JSONObject(response.body().string());
+                    JSONArray items = object.getJSONObject("result").getJSONArray("items");
+                    for(int i = 0;i<items.length();i++){
+                        JSONObject item = items.getJSONObject(i);
+                        itemMap.put(item.getInt("id"),item.getString("name"));
+                        //System.out.println("http://cdn.dota2.com/apps/dota2/images/items/" + item.getString("name").substring(5) + "_lg.png");
+                    }
+                    itemMap.put(0,"item_blank");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 } catch (IOException e) {

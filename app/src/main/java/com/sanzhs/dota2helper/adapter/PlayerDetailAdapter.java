@@ -10,13 +10,22 @@ import android.widget.TextView;
 
 import com.sanzhs.dota2helper.R;
 import com.sanzhs.dota2helper.fragment.Fragment1;
+import com.sanzhs.dota2helper.util.CircleTransform;
+import com.sanzhs.dota2helper.web.Dota2API;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.List;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 /**
  * Created by sanzhs on 2017/9/4.
@@ -51,7 +60,9 @@ public class PlayerDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     .resize(177,99)
                     .into(myViewHolder.hero);
 
-            myViewHolder.personName.setText("臭臭的嗨");
+            String account_id = player.getString("account_id");
+            setProfileData(myViewHolder,account_id);
+
             String warRate = "参战率:" + player.getString("warRate") + "%";
             myViewHolder.warRate.setText(warRate);
             String damageRate = "伤害:" + player.getString("damageRate") + "%";
@@ -65,40 +76,38 @@ public class PlayerDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             myViewHolder.kdaValue.setText(new DecimalFormat("######0.00").format(((double)(kills + assists))/deaths));
 
             Picasso.with(context)
-                    .load("https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/ec/ec6644436762757f5a8b4df1b5c1e6e783e81325.jpg")
+                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getInt("item_0")).substring(5) + "_lg.png")
                     .resize(64,64)
                     .into(myViewHolder.item_0);
 
             Picasso.with(context)
-                    .load("https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/ec/ec6644436762757f5a8b4df1b5c1e6e783e81325.jpg")
+                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getInt("item_1")).substring(5) + "_lg.png")
                     .resize(64,64)
                     .into(myViewHolder.item_1);
 
             Picasso.with(context)
-                    .load("https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/ec/ec6644436762757f5a8b4df1b5c1e6e783e81325.jpg")
+                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getInt("item_2")).substring(5) + "_lg.png")
                     .resize(64,64)
                     .into(myViewHolder.item_2);
 
             Picasso.with(context)
-                    .load("https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/ec/ec6644436762757f5a8b4df1b5c1e6e783e81325.jpg")
+                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getInt("item_3")).substring(5) + "_lg.png")
                     .resize(64,64)
                     .into(myViewHolder.item_3);
 
             Picasso.with(context)
-                    .load("https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/ec/ec6644436762757f5a8b4df1b5c1e6e783e81325.jpg")
+                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getInt("item_4")).substring(5) + "_lg.png")
                     .resize(64,64)
                     .into(myViewHolder.item_4);
 
             Picasso.with(context)
-                    .load("https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/ec/ec6644436762757f5a8b4df1b5c1e6e783e81325.jpg")
+                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getInt("item_5")).substring(5) + "_lg.png")
                     .resize(64,64)
                     .into(myViewHolder.item_5);
 
-            Picasso.with(context)
-                    .load("https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/ec/ec6644436762757f5a8b4df1b5c1e6e783e81325.jpg")
-                    .resize(128,128)
-                    .into(myViewHolder.avatar);
         } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -142,5 +151,59 @@ public class PlayerDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             item_5 = (ImageView) itemView.findViewById(R.id.item_5);
             avatar = (ImageView) itemView.findViewById(R.id.avatar);
         }
+    }
+
+    private void setProfileData(final MyViewHolder myViewHolder, String account_id){
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Dota2API.baseUrl)
+                .build();
+
+        Dota2API dota2API = retrofit.create(Dota2API.class);
+
+        Call<ResponseBody> call= dota2API.getPlayerSummaries(Dota2API.key,
+                String.valueOf(Long.valueOf(account_id) + Long.valueOf(Dota2API.offset)));
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    JSONObject result = new JSONObject(response.body().string());
+
+                    if(result.getJSONObject("response").getJSONArray("players").length() != 0){
+                        //personName
+                        String personName = result.getJSONObject("response").getJSONArray("players").getJSONObject(0).getString("personaname");
+                        myViewHolder.personName.setText(personName);
+
+                        //avatar picture
+                        String avatarUrl = result.getJSONObject("response").getJSONArray("players").getJSONObject(0).getString("avatarfull");
+                        Picasso.with(context)
+                                .load(avatarUrl)
+                                .transform(new CircleTransform())
+                                .resize(128,128)
+                                .into(myViewHolder.avatar);
+                    }else{
+                        //未公开资料
+                        myViewHolder.personName.setText("匿名玩家");
+                        Picasso.with(context)
+                                .load("file:///android_asset/player/unknown.png")
+                                .transform(new CircleTransform())
+                                .resize(128,128)
+                                .into(myViewHolder.avatar);
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
+
+
     }
 }

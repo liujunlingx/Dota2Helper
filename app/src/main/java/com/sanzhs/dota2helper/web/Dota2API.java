@@ -34,7 +34,8 @@ public interface Dota2API {
     int appId = 570;
     String key = "FA00A197B3CC052163DCF5C5B691009F";
     String account_id = "136647688";
-//    String account_id = "76561198096913416";
+    String offset = "76561197960265728";
+    String steam_id = String.valueOf(Long.valueOf(account_id) + Long.valueOf(offset));//76561198096913416
 
     //GetMatchHistory
     @GET("IDOTA2Match_570/GetMatchHistory/v1")
@@ -51,6 +52,10 @@ public interface Dota2API {
     //GetHeroes
     @GET("IEconDOTA2_570/GetHeroes/v1")
     Call<ResponseBody> getHeroes(@Query("key")String key);
+
+    //GetGameItems
+    @GET("IEconDOTA2_570/GetGameItems/V001")
+    Call<ResponseBody> getItems(@Query("key")String key);
 
     //GetNewsForApp
     @GET("ISteamNews/GetNewsForApp/v0002")
