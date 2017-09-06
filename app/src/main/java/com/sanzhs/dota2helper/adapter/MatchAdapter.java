@@ -57,7 +57,7 @@ public class MatchAdapter extends RecyclerView.Adapter<ViewHolder>
         String heroName = ((String)data.get(position).get("heroName")).substring(14);
 
         //load from network
-//        String imageUrl = Dota2API.imageUrl + "apps/dota2/images/heroes/" + heroName + "_sb.png";
+//        String imageUrl = Dota2Api.imageUrl + "apps/dota2/images/heroes/" + heroName + "_sb.png";
 //        Picasso.with(context)
 //                .load(imageUrl)
 //                .resize(177,99)

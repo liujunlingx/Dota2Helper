@@ -9,11 +9,13 @@ import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.sanzhs.dota2helper.adapter.PlayerDetailAdapter;
+import com.sanzhs.dota2helper.model.MatchDetail;
 import com.sanzhs.dota2helper.util.StringUtils;
-import com.sanzhs.dota2helper.web.Dota2API;
+import com.sanzhs.dota2helper.web.Dota2Api;
+import com.sanzhs.dota2helper.web.Dota2ApiInstance;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,7 +28,6 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 
 /**
@@ -41,8 +42,8 @@ public class MatchDetailActivity extends Activity {
 
     private RecyclerView radiantPlayersRecyclerView;
     private RecyclerView direPlayersRecyclerView;
-    private List<JSONObject> radiantList = new ArrayList<>();
-    private List<JSONObject> direList = new ArrayList<>();
+    private List<MatchDetail.ResultBean.PlayersBean> radiantList = new ArrayList<>();
+    private List<MatchDetail.ResultBean.PlayersBean> direList = new ArrayList<>();
     private PlayerDetailAdapter radiantAdapter;
     private PlayerDetailAdapter direAdapter;
 
@@ -80,70 +81,103 @@ public class MatchDetailActivity extends Activity {
     }
 
     private void queryMatchDetail(String matchId){
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Dota2API.baseUrl)
-                .build();
-
-        Dota2API dota2API = retrofit.create(Dota2API.class);
-
-        Call<ResponseBody> call= dota2API.getMatchDetails(Dota2API.key,matchId);
+        Call<ResponseBody> call= Dota2ApiInstance.getInstance().getDota2Api().getMatchDetails(Dota2Api.key,matchId);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
-                    JSONObject result = new JSONObject(response.body().string()).getJSONObject("result");
+                    Gson gson = new Gson();
+                    MatchDetail matchDetail = gson.fromJson(response.body().string(),MatchDetail.class);
 
-                    endTime.setText(StringUtils.unixTimeStampToDate(result.getLong("start_time"),"yyyy-MM-dd"));
-                    duration.setText(result.getInt("duration") + "秒");
-                    gameMode.setText(gameModeConversion(result.getInt("game_mode")));
+                    //JSONObject result = new JSONObject(response.body().string()).getJSONObject("result");
 
-                    JSONArray players = result.getJSONArray("players");
-                    int radiant_score = result.getInt("radiant_score");
-                    int dire_score = result.getInt("dire_score");
+                    endTime.setText(StringUtils.unixTimeStampToDate((long)matchDetail.getResult().getStart_time(),"yyyy-MM-dd"));
+                    String durationStr = matchDetail.getResult().getDuration() + "秒";
+                    duration.setText(durationStr);
+                    gameMode.setText(gameModeConversion(matchDetail.getResult().getGame_mode()));
+
+                    //JSONArray players = result.getJSONArray("players");
+                    int radiant_score = matchDetail.getResult().getRadiant_score();
+                    int dire_score = matchDetail.getResult().getDire_score();
 
                     int radiantTotalDamage = 0, direTotalDamage = 0;
-                    for(int i = 0;i<players.length();i++){
-                        JSONObject player = players.getJSONObject(i);
-                        int player_slot = player.getInt("player_slot");
-                        int hero_damage = player.getInt("hero_damage");
+                    for(MatchDetail.ResultBean.PlayersBean player : matchDetail.getResult().getPlayers()){
+                        int player_slot = player.getPlayer_slot();
+                        int hero_damage = player.getHero_damage();
                         if(player_slot <= 4){// 0 1 2 3 4 radiant,128 129 130 131 132 dire
                             radiantTotalDamage += hero_damage;
                         }else{
                             direTotalDamage += hero_damage;
                         }
                     }
+//                    for(int i = 0;i<players.length();i++){
+//                        JSONObject player = players.getJSONObject(i);
+//                        int player_slot = player.getInt("player_slot");
+//                        int hero_damage = player.getInt("hero_damage");
+//                        if(player_slot <= 4){// 0 1 2 3 4 radiant,128 129 130 131 132 dire
+//                            radiantTotalDamage += hero_damage;
+//                        }else{
+//                            direTotalDamage += hero_damage;
+//                        }
+//                    }
 
-                    for(int i = 0;i<players.length();i++){
-                        JSONObject player = players.getJSONObject(i);
-                        int player_slot = player.getInt("player_slot");
-                        int kills = player.getInt("kills");
-                        int assists = player.getInt("assists");
-                        int hero_damage = player.getInt("hero_damage");
+                    for(MatchDetail.ResultBean.PlayersBean player : matchDetail.getResult().getPlayers()){
+                        int player_slot = player.getPlayer_slot();
+                        int kills = player.getKills();
+                        int assists = player.getAssists();
+                        int hero_damage = player.getHero_damage();
 
                         if(player_slot <= 4){// 0 1 2 3 4 radiant,128 129 130 131 132 dire
                             if(radiant_score != 0)
-                                player.put("warRate",new DecimalFormat("######0.0").format(((double)(kills + assists))/radiant_score*100));
+                                player.setWarRate(new DecimalFormat("######0.0").format(((double)(kills + assists))/radiant_score*100));
                             else
-                                player.put("warRate",new DecimalFormat("######0.0").format(((double)(kills + assists))/1*100));
+                                player.setWarRate(new DecimalFormat("######0.0").format(((double)(kills + assists))/1*100));
 
-                            player.put("damageRate",new DecimalFormat("######0.0").format((double)hero_damage/radiantTotalDamage*100));
+                            player.setDamageRate(new DecimalFormat("######0.0").format((double)hero_damage/radiantTotalDamage*100));
                             radiantList.add(player);
                             radiantAdapter.notifyDataSetChanged();
                         }
                         else{
                             if(dire_score != 0)
-                                player.put("warRate",new DecimalFormat("######0.0").format(((double)(kills + assists))/dire_score*100));
+                                player.setWarRate(new DecimalFormat("######0.0").format(((double)(kills + assists))/dire_score*100));
                             else
-                                player.put("warRate",new DecimalFormat("######0.0").format(((double)(kills + assists))/1*100));
+                                player.setWarRate(new DecimalFormat("######0.0").format(((double)(kills + assists))/1*100));
 
-                            player.put("damageRate",new DecimalFormat("######0.0").format((double)hero_damage/direTotalDamage*100));
+                            player.setDamageRate(new DecimalFormat("######0.0").format((double)hero_damage/direTotalDamage*100));
                             direList.add(player);
                             direAdapter.notifyDataSetChanged();
                         }
                     }
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
+//                    for(int i = 0;i<players.length();i++){
+//                        JSONObject player = players.getJSONObject(i);
+//                        int player_slot = player.getInt("player_slot");
+//                        int kills = player.getInt("kills");
+//                        int assists = player.getInt("assists");
+//                        int hero_damage = player.getInt("hero_damage");
+//
+//                        if(player_slot <= 4){// 0 1 2 3 4 radiant,128 129 130 131 132 dire
+//                            if(radiant_score != 0)
+//                                player.put("warRate",new DecimalFormat("######0.0").format(((double)(kills + assists))/radiant_score*100));
+//                            else
+//                                player.put("warRate",new DecimalFormat("######0.0").format(((double)(kills + assists))/1*100));
+//
+//                            player.put("damageRate",new DecimalFormat("######0.0").format((double)hero_damage/radiantTotalDamage*100));
+//                            radiantList.add(player);
+//                            radiantAdapter.notifyDataSetChanged();
+//                        }
+//                        else{
+//                            if(dire_score != 0)
+//                                player.put("warRate",new DecimalFormat("######0.0").format(((double)(kills + assists))/dire_score*100));
+//                            else
+//                                player.put("warRate",new DecimalFormat("######0.0").format(((double)(kills + assists))/1*100));
+//
+//                            player.put("damageRate",new DecimalFormat("######0.0").format((double)hero_damage/direTotalDamage*100));
+//                            direList.add(player);
+//                            direAdapter.notifyDataSetChanged();
+//                        }
+//                    }
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

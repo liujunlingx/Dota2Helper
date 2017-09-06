@@ -12,7 +12,7 @@ import retrofit2.http.Url;
  * Created by sanzhs on 2017/8/29.
  */
 
-public interface Dota2API {
+public interface Dota2Api {
 
     String baseUrl = "http://api.steampowered.com/";
     /**
@@ -35,7 +35,8 @@ public interface Dota2API {
     String key = "FA00A197B3CC052163DCF5C5B691009F";
     String account_id = "136647688";
     String offset = "76561197960265728";
-    String steam_id = String.valueOf(Long.valueOf(account_id) + Long.valueOf(offset));//76561198096913416
+    //my steam_id:76561198096913416
+    String steam_id = String.valueOf(Long.valueOf(account_id) + Long.valueOf(offset));
 
     //GetMatchHistory
     @GET("IDOTA2Match_570/GetMatchHistory/v1")

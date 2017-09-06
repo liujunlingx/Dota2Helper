@@ -10,8 +10,10 @@ import android.widget.TextView;
 
 import com.sanzhs.dota2helper.R;
 import com.sanzhs.dota2helper.fragment.Fragment1;
+import com.sanzhs.dota2helper.model.MatchDetail;
 import com.sanzhs.dota2helper.util.CircleTransform;
-import com.sanzhs.dota2helper.web.Dota2API;
+import com.sanzhs.dota2helper.web.Dota2Api;
+import com.sanzhs.dota2helper.web.Dota2ApiInstance;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
@@ -25,7 +27,6 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 /**
  * Created by sanzhs on 2017/9/4.
@@ -33,10 +34,10 @@ import retrofit2.Retrofit;
 
 public class PlayerDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
-    private List<JSONObject> data;
+    private List<MatchDetail.ResultBean.PlayersBean> data;
     private Context context;
 
-    public PlayerDetailAdapter(Context context,List<JSONObject> data){
+    public PlayerDetailAdapter(Context context,List<MatchDetail.ResultBean.PlayersBean> data){
         this.context = context;
         this.data = data;
     }
@@ -51,63 +52,61 @@ public class PlayerDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         MyViewHolder myViewHolder = (MyViewHolder) holder;
-        JSONObject player = data.get(position);
+        MatchDetail.ResultBean.PlayersBean player = data.get(position);
 
         try {
-            String heroName = Fragment1.heroMap.get(player.getInt("hero_id"));
+            String heroName = Fragment1.heroMap.get(player.getHero_id());
             Picasso.with(context)
                     .load("file:///android_asset/heros/" + heroName.substring(14) + "_full.png")
                     .resize(177,99)
                     .into(myViewHolder.hero);
 
-            String account_id = player.getString("account_id");
+            String account_id = String.valueOf(player.getAccount_id());
             setProfileData(myViewHolder,account_id);
 
-            String warRate = "参战率:" + player.getString("warRate") + "%";
+            String warRate = "参战率:" + player.getWarRate() + "%";
             myViewHolder.warRate.setText(warRate);
-            String damageRate = "伤害:" + player.getString("damageRate") + "%";
+            String damageRate = "伤害:" + player.getDamageRate() + "%";
             myViewHolder.damageRate.setText(damageRate);
 
             int kills,deaths,assists;
-            kills = player.getInt("kills");
-            deaths = player.getInt("deaths");
-            assists = player.getInt("assists");
+            kills = player.getKills();
+            deaths = player.getDeaths();
+            assists = player.getAssists();
             myViewHolder.kda.setText(kills + "/" + deaths + "/" + assists);
             myViewHolder.kdaValue.setText(new DecimalFormat("######0.00").format(((double)(kills + assists))/deaths));
 
             Picasso.with(context)
-                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getInt("item_0")).substring(5) + "_lg.png")
+                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getItem_0()).substring(5) + "_lg.png")
                     .resize(64,64)
                     .into(myViewHolder.item_0);
 
             Picasso.with(context)
-                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getInt("item_1")).substring(5) + "_lg.png")
+                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getItem_1()).substring(5) + "_lg.png")
                     .resize(64,64)
                     .into(myViewHolder.item_1);
 
             Picasso.with(context)
-                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getInt("item_2")).substring(5) + "_lg.png")
+                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getItem_2()).substring(5) + "_lg.png")
                     .resize(64,64)
                     .into(myViewHolder.item_2);
 
             Picasso.with(context)
-                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getInt("item_3")).substring(5) + "_lg.png")
+                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getItem_3()).substring(5) + "_lg.png")
                     .resize(64,64)
                     .into(myViewHolder.item_3);
 
             Picasso.with(context)
-                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getInt("item_4")).substring(5) + "_lg.png")
+                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getItem_4()).substring(5) + "_lg.png")
                     .resize(64,64)
                     .into(myViewHolder.item_4);
 
             Picasso.with(context)
-                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getInt("item_5")).substring(5) + "_lg.png")
+                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getItem_5()).substring(5) + "_lg.png")
                     .resize(64,64)
                     .into(myViewHolder.item_5);
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
+        }  catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -154,14 +153,8 @@ public class PlayerDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     private void setProfileData(final MyViewHolder myViewHolder, String account_id){
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Dota2API.baseUrl)
-                .build();
-
-        Dota2API dota2API = retrofit.create(Dota2API.class);
-
-        Call<ResponseBody> call= dota2API.getPlayerSummaries(Dota2API.key,
-                String.valueOf(Long.valueOf(account_id) + Long.valueOf(Dota2API.offset)));
+        Call<ResponseBody> call= Dota2ApiInstance.getInstance().getDota2Api().getPlayerSummaries(Dota2Api.key,
+                String.valueOf(Long.valueOf(account_id) + Long.valueOf(Dota2Api.offset)));
 
         call.enqueue(new Callback<ResponseBody>() {
             @Override

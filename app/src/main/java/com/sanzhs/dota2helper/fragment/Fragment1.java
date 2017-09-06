@@ -3,7 +3,6 @@ package com.sanzhs.dota2helper.fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
@@ -18,10 +17,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.nuptboyzhb.lib.SuperSwipeRefreshLayout;
+import com.google.gson.Gson;
 import com.sanzhs.dota2helper.MatchDetailActivity;
 import com.sanzhs.dota2helper.R;
 import com.sanzhs.dota2helper.adapter.MatchAdapter;
-import com.sanzhs.dota2helper.web.Dota2API;
+import com.sanzhs.dota2helper.model.MatchDetail;
+import com.sanzhs.dota2helper.model.MatchHistory;
+import com.sanzhs.dota2helper.web.Dota2Api;
+import com.sanzhs.dota2helper.web.Dota2ApiInstance;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,7 +43,6 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 /**
  * Created by sanzhs on 2017/8/24.
@@ -101,7 +103,7 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
             public void onRefresh() {
                 int count = list.size();
                 list.clear();
-                getData(count,"");
+                getData(Dota2Api.account_id,count,"");
             }
 
             @Override
@@ -124,7 +126,7 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
                     public void run() {
                         int oldSize = list.size();
                         Long lastMatchId = Long.parseLong((String) list.get(oldSize-1).get("matchId"));
-                        getData(matches_requested,String.valueOf(lastMatchId - 1));
+                        getData(Dota2Api.account_id,matches_requested,String.valueOf(lastMatchId - 1));
                         swipeRefreshLayout.setLoadMore(false);
                     }
                 }, 3000);
@@ -161,7 +163,7 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
         initItemMap();
 
         //获取数据
-        getData(matches_requested,null);
+        getData(Dota2Api.account_id,matches_requested,null);
 
         return rootView;
     }
@@ -172,13 +174,7 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
     }
 
     public void initHeroMap(){
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Dota2API.baseUrl)
-                .build();
-
-        Dota2API dota2API = retrofit.create(Dota2API.class);
-
-        Call<ResponseBody> call= dota2API.getHeroes(Dota2API.key);
+        Call<ResponseBody> call= Dota2ApiInstance.getInstance().getDota2Api().getHeroes(Dota2Api.key);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -205,13 +201,7 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
     }
 
     public void initItemMap(){
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Dota2API.baseUrl)
-                .build();
-
-        Dota2API dota2API = retrofit.create(Dota2API.class);
-
-        Call<ResponseBody> call= dota2API.getItems(Dota2API.key);
+        Call<ResponseBody> call= Dota2ApiInstance.getInstance().getDota2Api().getItems(Dota2Api.key);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -239,30 +229,25 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
         });
     }
 
-    private void getData(int matches_requested, String start_at_match_id){
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Dota2API.baseUrl)
-                .build();
-
-        Dota2API dota2API = retrofit.create(Dota2API.class);
-
-        Call<ResponseBody> call= dota2API.getMatchHistory(Dota2API.key,
-                Dota2API.account_id,
-                String.valueOf(matches_requested),
-                start_at_match_id == null?"":start_at_match_id);
+    private void getData(final String account_id, int matches_requested, String start_at_match_id){
+        //getMatchHistory
+        Call<ResponseBody> call= Dota2ApiInstance.getInstance().getDota2Api()
+                .getMatchHistory(Dota2Api.key, account_id,
+                        String.valueOf(matches_requested),
+                        start_at_match_id == null?"":start_at_match_id);
 
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
-                    JSONObject object = new JSONObject(response.body().string());
-                    JSONArray matches = object.getJSONObject("result").getJSONArray("matches");
+                    Gson gson = new Gson();
+                    MatchHistory matchHistory = gson.fromJson(response.body().string(),MatchHistory.class);
                     List<String> matchIdList = new ArrayList<>();
-                    for(int i = 0;i<matches.length();i++){
-                        String matchId = matches.getJSONObject(i).getString("match_id");
+                    for(MatchHistory.ResultBean.MatchesBean match : matchHistory.getResult().getMatches()){
+                        String matchId = String.valueOf(match.getMatch_id());
                         matchIdList.add(matchId);
                     }
-                    getMatchDetails(matchIdList);
+                    getMatchDetails(account_id,matchIdList);
                     swipeRefreshLayout.setRefreshing(false);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -280,15 +265,9 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
 
     }
 
-    private void getMatchDetails(List<String> matchIdList) throws JSONException {
+    private void getMatchDetails(final String account_id, List<String> matchIdList) throws JSONException {
         for(final String matchId : matchIdList){
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(Dota2API.baseUrl)
-                    .build();
-
-            Dota2API dota2API = retrofit.create(Dota2API.class);
-
-            Call<ResponseBody> call= dota2API.getMatchDetails(Dota2API.key,matchId);
+            Call<ResponseBody> call= Dota2ApiInstance.getInstance().getDota2Api().getMatchDetails(Dota2Api.key,matchId);
             call.enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -299,23 +278,22 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
                         map.put("matchId",matchId);
 
                         if(response.body() == null) return;
-                        JSONObject result = new JSONObject(response.body().string()).getJSONObject("result");
-                        JSONArray players = result.getJSONArray("players");
-                        for(int i = 0;i<players.length();i++){
-                            JSONObject player = players.getJSONObject(i);
-                            if(player.getString("account_id").equals(Dota2API.account_id)){
-                                if(player.getInt("leaver_status") != 0)
+                        Gson gson = new Gson();
+                        MatchDetail matchDetail = gson.fromJson(response.body().string(),MatchDetail.class);
+                        for(MatchDetail.ResultBean.PlayersBean player : matchDetail.getResult().getPlayers()){
+                            if(player.getAccount_id() == Long.valueOf(account_id)){
+                                if(player.getLeaver_status() != 0)
                                     return;
-                                hero_id = player.getInt("hero_id");
-                                player_slot = player.getInt("player_slot");
-                                kills = player.getInt("kills");
-                                deaths = player.getInt("deaths");
-                                assists = player.getInt("assists");
+                                hero_id = player.getHero_id();
+                                player_slot = player.getPlayer_slot();
+                                kills = player.getKills();
+                                deaths = player.getDeaths();
+                                assists = player.getAssists();
                             }
                         }
 
-                        boolean radiant_win = result.getBoolean("radiant_win");
-                        long startTime = result.getLong("start_time");
+                        boolean radiant_win = matchDetail.getResult().isRadiant_win();
+                        long startTime = matchDetail.getResult().getStart_time();
 
                         String gameResult;
                         //player_slot is a 8bit structure
@@ -356,8 +334,6 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
                         });
 
                         Fragment1.this.adapter.notifyDataSetChanged();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
