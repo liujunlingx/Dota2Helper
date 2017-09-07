@@ -23,6 +23,7 @@ import com.sanzhs.dota2helper.R;
 import com.sanzhs.dota2helper.adapter.MatchAdapter;
 import com.sanzhs.dota2helper.model.MatchDetail;
 import com.sanzhs.dota2helper.model.MatchHistory;
+import com.sanzhs.dota2helper.util.StringUtils;
 import com.sanzhs.dota2helper.web.Dota2Api;
 import com.sanzhs.dota2helper.web.Dota2ApiInstance;
 
@@ -60,8 +61,8 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
     private int matches_requested = 20;
 
     public enum GameResult{
-        WIN("赢一手"),
-        LOSE("抱头鼠窜");
+        WIN("胜"),
+        LOSE("负");
         public String info;
         GameResult(String info){
             this.info = info;
@@ -294,6 +295,7 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
 
                         boolean radiant_win = matchDetail.getResult().isRadiant_win();
                         long startTime = matchDetail.getResult().getStart_time();
+                        int gameMode = matchDetail.getResult().getGame_mode();
 
                         String gameResult;
                         //player_slot is a 8bit structure
@@ -316,6 +318,7 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
                         map.put("heroName",heroMap.get(hero_id));
                         map.put("gameResult",gameResult);
                         map.put("startTime",startTime);
+                        map.put("gameMode", gameMode);
                         map.put("kdaValue",kdaValue);
                         map.put("kda",kda);
 

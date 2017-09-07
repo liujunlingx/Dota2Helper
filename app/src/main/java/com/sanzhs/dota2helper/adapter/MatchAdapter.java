@@ -78,6 +78,8 @@ public class MatchAdapter extends RecyclerView.Adapter<ViewHolder>
 
         String startTime = StringUtils.unixTimeStampToDate((long)data.get(position).get("startTime"),"yyyy-MM-dd");
         myViewHolder.endTime.setText(startTime);
+        String gameModeStr = StringUtils.gameModeConversion((Integer) data.get(position).get("gameMode"));
+        myViewHolder.gameMode.setText(gameModeStr);
 
         myViewHolder.kdaValue.setTypeface(null, Typeface.BOLD);
         myViewHolder.kdaValue.setText((String)data.get(position).get("kdaValue"));
@@ -96,6 +98,7 @@ public class MatchAdapter extends RecyclerView.Adapter<ViewHolder>
         ImageView ivHero;
         TextView gameResult;
         TextView endTime;
+        TextView gameMode;
         TextView kdaValue;
         TextView kda;
 
@@ -105,12 +108,14 @@ public class MatchAdapter extends RecyclerView.Adapter<ViewHolder>
             ivHero = (ImageView) view.findViewById(R.id.hero);
             gameResult = (TextView) view.findViewById(R.id.gameResult);
             endTime = (TextView) view.findViewById(R.id.startTime);
+            gameMode = (TextView) view.findViewById(R.id.gameMode);
             kdaValue = (TextView) view.findViewById(R.id.kdaValue);
             kda = (TextView) view.findViewById(R.id.kda);
 
             ivHero.setOnClickListener(this);
             gameResult.setOnClickListener(this);
             endTime.setOnClickListener(this);
+            gameMode.setOnClickListener(this);
             kdaValue.setOnClickListener(this);
             kda.setOnClickListener(this);
         }

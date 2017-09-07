@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         app:animDuration="200"
         android:padding="8dp"
-        app:collapseDrawable="@drawable/rocket_up"
+        app:collapseDrawable="@drawable/icon_green_arrow_up"
         app:collapseExpandGrarity="right"
         app:collapseExpandTextColor="@color/main_color"
         app:contentTextColor="@color/gray"

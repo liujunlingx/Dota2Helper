@@ -12,6 +12,7 @@ import com.sanzhs.dota2helper.R;
 import com.sanzhs.dota2helper.fragment.Fragment1;
 import com.sanzhs.dota2helper.model.MatchDetail;
 import com.sanzhs.dota2helper.util.CircleTransform;
+import com.sanzhs.dota2helper.util.StringUtils;
 import com.sanzhs.dota2helper.web.Dota2Api;
 import com.sanzhs.dota2helper.web.Dota2ApiInstance;
 import com.squareup.picasso.Picasso;
@@ -119,7 +120,6 @@ public class PlayerDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     class MyViewHolder extends RecyclerView.ViewHolder{
 
         ImageView hero;
-        //TODO load from api,process if too long
         TextView personName;
         TextView warRate;
         TextView damageRate;
@@ -131,7 +131,6 @@ public class PlayerDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         ImageView item_3;
         ImageView item_4;
         ImageView item_5;
-        //TODO load from api
         ImageView avatar;
 
         public MyViewHolder(View itemView) {
@@ -165,6 +164,14 @@ public class PlayerDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     if(result.getJSONObject("response").getJSONArray("players").length() != 0){
                         //personName
                         String personName = result.getJSONObject("response").getJSONArray("players").getJSONObject(0).getString("personaname");
+                        //process personName too long
+                        if(StringUtils.isContainChinese(personName)){
+                            if(personName.length() > 11)
+                                personName = personName.substring(0,10).trim() + "...";
+                        }else{
+                            if(personName.length() > 22)
+                                personName = personName.substring(0,21).trim() + "...";
+                        }
                         myViewHolder.personName.setText(personName);
 
                         //avatar picture
