@@ -1,11 +1,14 @@
 package com.sanzhs.dota2helper.adapter;
 
 import android.content.Context;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.sanzhs.dota2helper.R;
@@ -16,6 +19,8 @@ import com.sanzhs.dota2helper.util.StringUtils;
 import com.sanzhs.dota2helper.web.Dota2Api;
 import com.sanzhs.dota2helper.web.Dota2ApiInstance;
 import com.squareup.picasso.Picasso;
+
+import net.cachapa.expandablelayout.ExpandableLayout;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,6 +67,8 @@ public class PlayerDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     .resize(177,99)
                     .into(myViewHolder.hero);
 
+            myViewHolder.level.setText(String.valueOf(player.getLevel()));
+
             String account_id = String.valueOf(player.getAccount_id());
             setProfileData(myViewHolder,account_id);
 
@@ -107,6 +114,51 @@ public class PlayerDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     .resize(64,64)
                     .into(myViewHolder.item_5);
 
+            //Expandable content
+            String heroDamage = "英雄伤害:" + player.getHero_damage();
+            myViewHolder.heroDamage.setText(heroDamage);
+            Picasso.with(context)
+                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getBackpack_0()).substring(5) + "_lg.png")
+                    .resize(64,64)
+                    .into(myViewHolder.backpack_0);
+
+            Picasso.with(context)
+                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getBackpack_1()).substring(5) + "_lg.png")
+                    .resize(64,64)
+                    .into(myViewHolder.backpack_1);
+
+            Picasso.with(context)
+                    .load("file:///android_asset/items/" + Fragment1.itemMap.get(player.getBackpack_2()).substring(5) + "_lg.png")
+                    .resize(64,64)
+                    .into(myViewHolder.backpack_2);
+
+            String gold_per_min = "每分钟金钱:" + player.getGold_per_min();
+            myViewHolder.gold_per_min.setText(gold_per_min);
+
+            String tower_Damage = "建筑伤害:" + player.getTower_damage();
+            myViewHolder.tower_damage.setText(tower_Damage);
+
+            String last_hits = "正补:" + player.getLast_hits();
+            myViewHolder.last_hits.setText(last_hits);
+
+            String xp_per_min = "每分钟经验:" + player.getXp_per_min();
+            myViewHolder.xp_per_min.setText(xp_per_min);
+
+            String hero_healing = "英雄治疗:" + player.getHero_healing();
+            myViewHolder.hero_healing.setText(hero_healing);
+
+            String denies = "反补:" + player.getDenies();
+            myViewHolder.denies.setText(denies);
+
+            String gold_total = "财产总和:" + String.valueOf(player.getGold() + player.getGold_spent());
+            myViewHolder.gold_total.setText(gold_total);
+
+            String gold_spent = "花费金钱:" + player.getGold_spent();
+            myViewHolder.gold_spent.setText(gold_spent);
+
+            String gold = "当前金钱:" + player.getGold();
+            myViewHolder.gold.setText(gold);
+
         }  catch (Exception e) {
             e.printStackTrace();
         }
@@ -120,6 +172,7 @@ public class PlayerDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     class MyViewHolder extends RecyclerView.ViewHolder{
 
         ImageView hero;
+        TextView level;
         TextView personName;
         TextView warRate;
         TextView damageRate;
@@ -133,9 +186,27 @@ public class PlayerDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         ImageView item_5;
         ImageView avatar;
 
+        LinearLayout expand;
+        ExpandableLayout expandableLayout;
+        TextView heroDamage;
+        ImageView backpack_0;
+        ImageView backpack_1;
+        ImageView backpack_2;
+        TextView gold_per_min;
+        TextView tower_damage;
+        TextView last_hits;
+        TextView xp_per_min;
+        TextView hero_healing;
+        TextView denies;
+        TextView gold_total;
+        TextView gold_spent;
+        TextView gold;
+
+
         public MyViewHolder(View itemView) {
             super(itemView);
             hero = (ImageView) itemView.findViewById(R.id.hero);
+            level = (TextView) itemView.findViewById(R.id.level);
             personName = (TextView) itemView.findViewById(R.id.personName);
             warRate = (TextView) itemView.findViewById(R.id.warRate);
             damageRate = (TextView) itemView.findViewById(R.id.damageRate);
@@ -148,6 +219,37 @@ public class PlayerDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             item_4 = (ImageView) itemView.findViewById(R.id.item_4);
             item_5 = (ImageView) itemView.findViewById(R.id.item_5);
             avatar = (ImageView) itemView.findViewById(R.id.avatar);
+
+            //Expandable content
+            expand = (LinearLayout)itemView.findViewById(R.id.expand);
+            expandableLayout = (ExpandableLayout) itemView.findViewById(R.id.expandlayout);
+            heroDamage = (TextView) itemView.findViewById(R.id.heroDamage);
+            backpack_0 = (ImageView) itemView.findViewById(R.id.backpack_0);
+            backpack_1 = (ImageView) itemView.findViewById(R.id.backpack_1);
+            backpack_2 = (ImageView) itemView.findViewById(R.id.backpack_2);
+            //灰色
+            ColorMatrix matrix = new ColorMatrix();
+            matrix.setSaturation(0);//饱和度 0灰色 100过度彩色，50正常
+            ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
+            backpack_0.setColorFilter(filter);
+            backpack_1.setColorFilter(filter);
+            backpack_2.setColorFilter(filter);
+            gold_per_min = (TextView) itemView.findViewById(R.id.gold_per_min);
+            tower_damage = (TextView) itemView.findViewById(R.id.towerDamage);
+            last_hits = (TextView) itemView.findViewById(R.id.last_hits);
+            xp_per_min = (TextView) itemView.findViewById(R.id.xp_per_min);
+            hero_healing = (TextView) itemView.findViewById(R.id.hero_healing);
+            denies = (TextView) itemView.findViewById(R.id.denies);
+            gold_total = (TextView) itemView.findViewById(R.id.gold_total);
+            gold_spent = (TextView) itemView.findViewById(R.id.gold_spent);
+            gold = (TextView) itemView.findViewById(R.id.gold);
+
+            expand.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    expandableLayout.toggle();
+                }
+            });
         }
     }
 
@@ -166,8 +268,8 @@ public class PlayerDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                         String personName = result.getJSONObject("response").getJSONArray("players").getJSONObject(0).getString("personaname");
                         //process personName too long
                         if(StringUtils.isContainChinese(personName)){
-                            if(personName.length() > 11)
-                                personName = personName.substring(0,10).trim() + "...";
+                            if(personName.length() > 10)
+                                personName = personName.substring(0,9).trim() + "...";
                         }else{
                             if(personName.length() > 22)
                                 personName = personName.substring(0,21).trim() + "...";

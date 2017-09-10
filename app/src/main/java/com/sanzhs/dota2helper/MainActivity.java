@@ -9,6 +9,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.Window;
 
 import com.sanzhs.dota2helper.fragment.Fragment1;
 import com.sanzhs.dota2helper.fragment.Fragment2;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    //private TextView mTextMessage;
     private ViewPager vp;
     private BottomNavigationView navigation;
 

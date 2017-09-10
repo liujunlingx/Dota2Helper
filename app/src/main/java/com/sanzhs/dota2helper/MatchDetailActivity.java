@@ -10,7 +10,6 @@ import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -56,6 +55,8 @@ public class MatchDetailActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.item_match_detail);
+
+        System.out.println("MatchDetailActivity onCreate");
 
         findViewByIds();
 
@@ -166,4 +167,9 @@ public class MatchDetailActivity extends Activity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        System.out.println("MatchDetailActivity onResume");
+    }
 }

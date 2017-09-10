@@ -35,4 +35,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.google.code.gson:gson-parent:2.8.1'
     compile 'com.google.code.gson:gson:2.8.1'
+    compile 'net.cachapa.expandablelayout:expandablelayout:2.9.2'
 }

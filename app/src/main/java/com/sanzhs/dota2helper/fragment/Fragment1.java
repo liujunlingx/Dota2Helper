@@ -3,16 +3,21 @@ package com.sanzhs.dota2helper.fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,8 +56,8 @@ import retrofit2.Response;
 
 public class Fragment1 extends Fragment implements AdapterView.OnItemClickListener{
 
-    //TODO 单场详细加个toolbar，左边返回，中间比赛id
-    //TODO 搜索id
+    //TODO 点击expandable content后，滑动的bug
+    //TODO toolbar样式太丑，改为和原生actionBar一样
     //TODO recyclerView右边搞个进度条
     //TODO 处理没有网络的情况
     //TODO 处理卷轴物品
@@ -69,6 +74,8 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
         }
     }
 
+    private Toolbar toolbar;
+    private SearchView searchView;
     private SuperSwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
     private MatchAdapter adapter;
@@ -77,34 +84,35 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
     public static Map<Integer,String> itemMap = new HashMap<>();
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        switch (view.getId()){
-            case R.id.hero:
-                Toast.makeText(getActivity(),"hero clicked,match id: " + list.get(position).get("matchId"),Toast.LENGTH_LONG).show();
-                break;
-            case R.id.gameResult:
-                Toast.makeText(getActivity(),"gameResult clicked",Toast.LENGTH_SHORT).show();
-                break;
-            default:
-                Intent intent = new Intent();
-                intent.putExtra("matchId",(String) list.get(position).get("matchId"));
-                intent.setClass(getContext(), MatchDetailActivity.class);
-                startActivity(intent);
-        }
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment1, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment1, container, false);
         findViewByIds(rootView);
+        toolbar.setTitle("Dota2Helper");
+        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+
+        //searchView.setSubmitButtonEnabled(true);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                list.clear();
+                getData(query,matches_requested,"");
+                searchView.onActionViewCollapsed();
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
 
         //设置下拉刷新监听器
         swipeRefreshLayout.setOnPullRefreshListener(new SuperSwipeRefreshLayout.OnPullRefreshListener() {
             @Override
             public void onRefresh() {
-                int count = list.size();
                 list.clear();
-                getData(Dota2Api.account_id,count,"");
+                getData(Dota2Api.account_id,matches_requested,"");
             }
 
             @Override
@@ -150,13 +158,6 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         adapter = new MatchAdapter(getActivity(),list,this);
         recyclerView.setAdapter(adapter);
-        recyclerView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Bundle bundle = new Bundle();
-                System.out.println();
-            }
-        });
 
         //初始化heroMap
         initHeroMap();
@@ -243,6 +244,10 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
                 try {
                     Gson gson = new Gson();
                     MatchHistory matchHistory = gson.fromJson(response.body().string(),MatchHistory.class);
+                    if(matchHistory.getResult().getStatus() != 1){
+                        Snackbar.make(getView(),"数字id错误或未公开信息。",Snackbar.LENGTH_LONG).show();
+                        return;
+                    }
                     List<String> matchIdList = new ArrayList<>();
                     for(MatchHistory.ResultBean.MatchesBean match : matchHistory.getResult().getMatches()){
                         String matchId = String.valueOf(match.getMatch_id());
@@ -361,8 +366,27 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
     }
 
     private void findViewByIds(View rootView){
+        toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        searchView = (SearchView) rootView.findViewById(R.id.searchView);
         swipeRefreshLayout = (SuperSwipeRefreshLayout) rootView.findViewById(R.id.swipeRefreshLayout);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.rvMatches);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        switch (view.getId()){
+            case R.id.hero:
+                Toast.makeText(getActivity(),"hero clicked,match id: " + list.get(position).get("matchId"),Toast.LENGTH_LONG).show();
+                break;
+            case R.id.gameResult:
+                Toast.makeText(getActivity(),"gameResult clicked",Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                Intent intent = new Intent();
+                intent.putExtra("matchId",(String) list.get(position).get("matchId"));
+                intent.setClass(getContext(), MatchDetailActivity.class);
+                startActivity(intent);
+        }
     }
 
 }
