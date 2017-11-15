@@ -8,12 +8,14 @@
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="40dp">
+        android:layout_height="30dp"
+        android:layout_marginBottom="20dp">
 
         <android.support.v7.widget.SearchView
             android:id="@+id/searchView"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:imeOptions="actionDone"
             app:defaultQueryHint="搜索数字id"
             android:focusable="false"

@@ -39,7 +39,8 @@ public class Fragment2 extends Fragment {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
-                    System.out.println(response.body().string());
+                    if(response.body() != null)
+                        System.out.println(response.body().string());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

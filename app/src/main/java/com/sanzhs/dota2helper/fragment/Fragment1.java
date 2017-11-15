@@ -56,8 +56,12 @@ import retrofit2.Response;
 
 public class Fragment1 extends Fragment implements AdapterView.OnItemClickListener{
 
-    //TODO 点击expandable content后，滑动的bug
-    //TODO toolbar样式太丑，改为和原生actionBar一样
+    //TODO 给APP起一个blingbling闪亮的名字
+    //TODO 加带搜索历史的搜索框
+    //TODO 第二页加个功能
+    //TODO 单场详细点击expandable content后，滑动的bug
+    //TODO searchview样式美化
+    //TODO 处理横屏情况
     //TODO recyclerView右边搞个进度条
     //TODO 处理没有网络的情况
     //TODO 处理卷轴物品
@@ -87,7 +91,7 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment1, container, false);
         findViewByIds(rootView);
-        toolbar.setTitle("Dota2Helper");
+        //toolbar.setTitle("Dota2Helper");
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
 
         //searchView.setSubmitButtonEnabled(true);
@@ -96,6 +100,7 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
             public boolean onQueryTextSubmit(String query) {
                 list.clear();
                 getData(query,matches_requested,"");
+                searchView.setQueryHint("搜索数字id");
                 searchView.onActionViewCollapsed();
                 return false;
             }

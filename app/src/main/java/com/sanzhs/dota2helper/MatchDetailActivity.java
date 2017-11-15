@@ -10,6 +10,7 @@ import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -36,6 +37,7 @@ import retrofit2.Response;
 
 public class MatchDetailActivity extends Activity {
 
+    //private ScrollView scrollView;
     private Toolbar toolbar;
     private TextView toolbar_title;
 
@@ -76,13 +78,13 @@ public class MatchDetailActivity extends Activity {
         radiantPlayersRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         radiantPlayersRecyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(), OrientationHelper.VERTICAL));
         radiantPlayersRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        radiantAdapter = new PlayerDetailAdapter(getApplicationContext(),radiantList);
+        radiantAdapter = new PlayerDetailAdapter(getApplicationContext(),radiantList,radiantPlayersRecyclerView);
         radiantPlayersRecyclerView.setAdapter(radiantAdapter);
 
         direPlayersRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         direPlayersRecyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(), OrientationHelper.VERTICAL));
         direPlayersRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        direAdapter = new PlayerDetailAdapter(getApplicationContext(),direList);
+        direAdapter = new PlayerDetailAdapter(getApplicationContext(),direList,direPlayersRecyclerView);
         direPlayersRecyclerView.setAdapter(direAdapter);
 
         queryMatchDetail(matchId);
@@ -90,6 +92,7 @@ public class MatchDetailActivity extends Activity {
     }
 
     private void findViewByIds(){
+        //scrollView = (ScrollView) findViewById(R.id.scrollView);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar_title = (TextView) findViewById(R.id.title);
         endTime = (TextView) findViewById(R.id.endTime);
@@ -171,5 +174,6 @@ public class MatchDetailActivity extends Activity {
     protected void onResume() {
         super.onResume();
         System.out.println("MatchDetailActivity onResume");
+        //scrollView.fullScroll(ScrollView.FOCUS_DOWN);
     }
 }

@@ -1,7 +1,7 @@
 # Dota2Helper
 A convinent tool showing dota2 user data.
 
-## Function
+## Functions
 - [x] Recent matches.
 - [x] Match detail.
 - [x] Dota2 News.
