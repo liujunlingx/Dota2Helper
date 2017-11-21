@@ -7,4 +7,7 @@
     <string name="duration">持续时间</string>
     <string name="gameMode">比赛模式</string>
     <string name="centerText">https://github.com/castellanogg/Dota2Helper</string>
+    <string name="stats">Stats</string>
+    <string name="live">Live</string>
+    <string name="news">News</string>
 </resources>

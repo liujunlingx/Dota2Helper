@@ -57,8 +57,8 @@ import retrofit2.Response;
 public class Fragment1 extends Fragment implements AdapterView.OnItemClickListener{
 
     //TODO 给APP起一个blingbling闪亮的名字
-    //TODO 加带搜索历史的搜索框
-    //TODO 第二页加个功能
+    //TODO 重做搜索框(重构ui，并且换一个带搜索历史的)
+    //TODO 第二页加个直播功能
     //TODO 单场详细点击expandable content后，滑动的bug
     //TODO searchview样式美化
     //TODO 处理横屏情况

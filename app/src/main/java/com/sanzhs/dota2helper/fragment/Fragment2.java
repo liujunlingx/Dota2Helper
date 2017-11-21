@@ -30,7 +30,7 @@ public class Fragment2 extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment2, container, false);
 
         TextView tv = (TextView) rootView.findViewById(R.id.textView2);
-        tv.setText("fragment2");
+        tv.setText("直播板块2018年2月更新~");
 
         Call<ResponseBody> result = PubgApiInstance.getInstance().getPubgApi()
                 .getPlayerStats(PubgApi.key,"Jcentertainment");
