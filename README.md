@@ -1,3 +1,5 @@
+[![Build Status](https://www.travis-ci.org/castellanogg/Dota2Helper.svg?branch=master)](https://www.travis-ci.org/castellanogg/Dota2Helper.svg?branch=master)
+
 # Dota2Helper
 A convinent tool showing dota2 user data.
 
