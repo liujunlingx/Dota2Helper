@@ -10,6 +10,9 @@ android:
 script:
   - "./gradlew assembleRelease"
 
+before_install:
+  - chmod +x gradlew
+
 deploy:
   provider: releases
   api_key:
