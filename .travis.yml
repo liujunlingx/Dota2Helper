@@ -1,0 +1,20 @@
+language: android
+
+android:
+  components:
+  - build-tools-25.0.3
+  - android-25
+  - extra-android-m2repository
+  - extra-android-support
+
+script:
+  - "./gradlew assembleRelease"
+
+deploy:
+  provider: releases
+  api_key:
+    secure: adrQ6W9bD7HzYf3PflRAOKBNHI/gah+b0tJEj2tA8i+3HYol9iz69oxWnSCBW7f/jNiv+WOnsYcgUiARXj2n/HPBSOfRUJ8cSUwU0O4eSux8pIgsDwdF7UQaqBsJ9S9X9MR+bvnqWizzGfNxSkPT5aNVxwDbAuO9Sv9vbDuEhvcVgK8iIh/T9cyKTHcOrQaKv3c2ziKtNbLcC9LL3J9tgljvzDxlO/4T82vWPAJBrM4qG8scai0L0LSLtoLLZ/48WCYmlZyvN24e3v+HLdJS+XS0q7iB52EZ8QXxY93bQGN6i59qiix1vjnjSUablfZVnVLbv7UjUjSl9QF8GHDHI38UhsU7jbahdIb2guv0GTHiyFO+G64UlMWGSHqvYL4X7if9N2cRQ4AGDNhk/7DxKWwTskgP4NzkKFD3pB3xBouz3sVB7xOcmF5g3AOEdSQ1clWTgjikS19/pPu7DrsKVMLLxvzen49cXHzgeiyYrEXAlATCnciG9zqPqm4Y2balZUwNPTxQeaJpxMYPUDo3mJbaZadymv7Z0tcW2n7P9o/t1MKHmPLruE58sACTwdAySPCcfJoITMMy1GljXdgtUsjbhTvUQX+4+KjjJztwtWy47Sbg6L+Ey/qAlq81vMUfeSSWuExygTIGHMSFctmcf4QwqPE3fx8ielX4TEpe3Gg=
+  file: app/build/outputs/apk/app-release.apk
+  on:
+    repo: castellanogg/Dota2Helper
+    tags: true
