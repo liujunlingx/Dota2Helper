@@ -11,7 +11,8 @@ cache:
   directories:
   - "$HOME/.m2"
 before_install:
-- openssl aes-256-cbc -K $encrypted_204987368a71_key -iv $encrypted_204987368a71_iv -in android.jks.enc -out keys/android.jks -d
+- openssl aes-256-cbc -K $encrypted_ed259a552e64_key -iv $encrypted_ed259a552e64_iv
+  -in android.jks.enc -out keys/android.jks -d
 - chmod +x gradlew
 before_deploy:
 - ls app/build/outputs/apk/
