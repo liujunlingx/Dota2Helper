@@ -10,4 +10,7 @@
     <string name="stats">Stats</string>
     <string name="live">Live</string>
     <string name="news">News</string>
+    <string name="navigation_drawer_open">drawer open</string>
+    <string name="navigation_drawer_close">drawer close</string>
+    <string name="searchHint">搜索数字id</string>
 </resources>

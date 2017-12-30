@@ -13,6 +13,7 @@ import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,6 +69,7 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
     //TODO 怎么让所有东西一次性显示出来
 
     private int matches_requested = 20;
+    private String playerId;//数字id
 
     public enum GameResult{
         WIN("胜"),
@@ -78,12 +80,10 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
         }
     }
 
-    private Toolbar toolbar;
-    private SearchView searchView;
     private SuperSwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
     private MatchAdapter adapter;
-    private List<Map<String, Object>> list = new ArrayList<>();
+    private static List<Map<String, Object>> list = new ArrayList<>();
     public static Map<Integer,String> heroMap = new HashMap<>();//key:hero_id, value:heroName eg. npc_dota_hero_riki
     public static Map<Integer,String> itemMap = new HashMap<>();
 
@@ -91,25 +91,12 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment1, container, false);
         findViewByIds(rootView);
-        //toolbar.setTitle("Dota2Helper");
-        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
 
-        //searchView.setSubmitButtonEnabled(true);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                list.clear();
-                getData(query,matches_requested,"");
-                searchView.setQueryHint("搜索数字id");
-                searchView.onActionViewCollapsed();
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
+        playerId = getArguments()==null?"none":getArguments().getString("playerId","none");
+        if(!playerId.equals("none")){
+            list.clear();
+            getData(playerId,matches_requested,"");
+        }
 
 
         //设置下拉刷新监听器
@@ -117,7 +104,7 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
             @Override
             public void onRefresh() {
                 list.clear();
-                getData(Dota2Api.account_id,matches_requested,"");
+                getData(playerId,matches_requested,"");
             }
 
             @Override
@@ -140,7 +127,7 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
                     public void run() {
                         int oldSize = list.size();
                         Long lastMatchId = Long.parseLong((String) list.get(oldSize-1).get("matchId"));
-                        getData(Dota2Api.account_id,matches_requested,String.valueOf(lastMatchId - 1));
+                        getData(playerId,matches_requested,String.valueOf(lastMatchId - 1));
                         swipeRefreshLayout.setLoadMore(false);
                     }
                 }, 3000);
@@ -170,7 +157,7 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
         initItemMap();
 
         //获取数据
-        getData(Dota2Api.account_id,matches_requested,null);
+        //getData(Dota2Api.account_id,matches_requested,null);
 
         return rootView;
     }
@@ -371,8 +358,6 @@ public class Fragment1 extends Fragment implements AdapterView.OnItemClickListen
     }
 
     private void findViewByIds(View rootView){
-        toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
-        searchView = (SearchView) rootView.findViewById(R.id.searchView);
         swipeRefreshLayout = (SuperSwipeRefreshLayout) rootView.findViewById(R.id.swipeRefreshLayout);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.rvMatches);
     }

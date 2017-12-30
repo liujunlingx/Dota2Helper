@@ -34,9 +34,10 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
-    compile 'com.android.support:support-vector-drawable:25.3.1'
+    compile 'com.android.support:appcompat-v7:25.0.0'
+    compile 'com.android.support:design:25.0.0'
+    compile 'com.android.support:support-vector-drawable:25.0.0'
+
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.github.nuptboyzhb.lib.uikit:superswiperefreshlayout:1.0.0'
@@ -45,4 +46,6 @@ dependencies {
     compile 'com.google.code.gson:gson-parent:2.8.1'
     compile 'com.google.code.gson:gson:2.8.1'
     compile 'net.cachapa.expandablelayout:expandablelayout:2.9.2'
+
+    compile 'com.lapism:searchview:4.0'
 }

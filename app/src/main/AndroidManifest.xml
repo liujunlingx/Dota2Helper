@@ -21,9 +21,10 @@
         </activity>
         <activity
             android:name=".MatchDetailActivity">
-
         </activity>
-
+        <activity
+            android:name=".SearchActivity">
+        </activity>
     </application>
 
 </manifest>
