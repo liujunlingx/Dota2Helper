@@ -17,6 +17,8 @@ public interface Dota2Api {
     String baseUrl = "http://api.steampowered.com/";
 
     /**
+     * 注意，手机要翻墙才能访问这些网站
+     *
      * hero
      * http://cdn.dota2.com/apps/dota2/images/heroes/HERONAME_SUFFIX
      * suffix:
